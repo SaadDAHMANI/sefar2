@@ -1,8 +1,5 @@
-use sefar2::algorithms::pso::{Pso, PsoConfig};
 use sefar2::benchmarks::real::Sphere;
-use sefar2::core::evaluator::Sequential;
-
-use sefar2::core::optimizer::Optimizer;
+use sefar2::prelude::*;
 
 fn main() {
     println!("Hello, Sefar2!");
