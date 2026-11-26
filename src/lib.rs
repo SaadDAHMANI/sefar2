@@ -1,6 +1,7 @@
 pub mod algorithms;
 pub mod benchmarks;
 pub mod core;
+pub mod operators;
 
 pub mod prelude {
     pub use crate::algorithms::pso::{Pso, PsoConfig};

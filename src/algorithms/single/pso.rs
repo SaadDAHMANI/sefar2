@@ -58,8 +58,25 @@ where
         let w_max: f64 = 0.9;
         let w_min: f64 = 0.2;
 
-        let mut v_max = Vec::with_capacity(dim);
-        let mut v_min = Vec::with_capacity(dim);
+        let mut v_max: Vec<f64> = Vec::with_capacity(dim);
+        let mut v_min: Vec<f64> = Vec::with_capacity(dim);
+
+        for i in 0..dim {
+            v_max.push((ub[i] - lb[i]) * 0.2f64);
+            v_min.push(-1.0 * v_max[i]);
+        }
+
+        let mut cgcurve = vec![0.0f64; max_iter];
+
+        // Velocities initialization
+        let mut v = vec![vec![0.0f64; dim]; nop];
+        let mut rand1 = vec![0.0f64; dim];
+        let mut rand2 = vec![0.0f64; dim];
+
+        //------------------------------------
+        // PSO algorithm
+        // Particles initialization
+        // let mut particles = self.initialize(self.params, InitializationMode::RealUniform);
 
         // ------------------------------------
         // Main PSO loop
