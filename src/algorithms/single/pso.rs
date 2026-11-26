@@ -58,12 +58,12 @@ where
         let w_max: f64 = 0.9;
         let w_min: f64 = 0.2;
 
+        let mut v_max = Vec::with_capacity(dim);
+        let mut v_min = Vec::with_capacity(dim);
+
         // ------------------------------------
         // Main PSO loop
         for iter in 0..max_iter {
-
-
-            
             //---------- Call the callback ----------------------
             if let Some(cb) = self.callback.as_mut() {
                 let mut stop = false;
