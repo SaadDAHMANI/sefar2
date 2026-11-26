@@ -3,11 +3,11 @@
 ///
 /// This trait define optimization problem.
 ///
-pub trait Problem: Sync {
-    type Genome: Clone + Send + Sync;
-    type Fitness: Send;
+pub trait Problem {
+    type Genome: Clone;
+    type Fitness;
 
-    fn evaluate(&self, genome: &Self::Genome) -> Self::Fitness;
+    fn evaluate(&mut self, genome: &Self::Genome) -> Self::Fitness;
 }
 
 ///
