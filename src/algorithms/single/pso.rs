@@ -43,6 +43,7 @@ where
     }
 }
 
+#[derive(Clone, Copy, Debug, Default)]
 pub struct PsoConfig {
     pub swarm_size: usize,
     pub max_iterations: usize,

@@ -39,7 +39,17 @@ fn pso_sphere_parallel_test1() {
 
     let mut problem = Sphere::new(5);
 
-    let mut algo = Pso::new(config, Parallel::new(4));
+    let mut algo = Pso::new(config.clone(), Parallel::new(4));
+
+    let output = algo.optimize(&mut problem);
+
+    println!(
+        "best.sol : {:?}, best-fit : {:?}",
+        output.best_genome, output.best_fitness
+    );
+    //---------------
+
+    let mut algo = Pso::new(config, Parallel::new(6));
 
     let output = algo.optimize(&mut problem);
 
