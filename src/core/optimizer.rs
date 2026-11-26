@@ -5,5 +5,5 @@ use super::problem::Problem;
 ///
 pub trait Optimizer<P: Problem> {
     type Output;
-    fn optimize(&mut self, problem: &P) -> Self::Output;
+    fn optimize(&mut self, problem: &mut P) -> Self::Output;
 }
