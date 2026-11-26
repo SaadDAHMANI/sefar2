@@ -1,3 +1,5 @@
+use crate::core::problem::{Bounds, Problem, RealProblem};
+
 /// Sphere problem benchmark
 ///
 #[derive(Clone)]

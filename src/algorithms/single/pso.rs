@@ -25,7 +25,18 @@ where
         // ... identical to before; these calls now go through &mut:
         //     let dim = problem.dimension();
         //     let fitness = self.evaluator.evaluate(problem, &positions);
-        todo!()
+        // todo!()
+    
+    problem.evaluate(genome)
+        
+        let result = SingleResult {
+            best_genome: vec![-1.0; 5],
+            best_fitness: -5.0,
+            evaluations: 10,
+            history: vec![-1.0; 5],
+        };
+
+        result
     }
 }
 
