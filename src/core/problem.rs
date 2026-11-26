@@ -31,5 +31,14 @@ pub struct Bounds {
     pub upper: Vec<f64>,
 }
 
+impl Bounds {
+    pub fn uniform(lower: f64, upper: f64, dim: usize) -> Self {
+        Bounds {
+            lower: vec![lower; dim],
+            upper: vec![upper; dim],
+        }
+    }
+}
+
 /// Fitness for multi-objective problems
 pub type Objectives = Vec<f64>;
