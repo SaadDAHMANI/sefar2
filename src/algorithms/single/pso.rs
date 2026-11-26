@@ -26,9 +26,12 @@ where
         //     let dim = problem.dimension();
         //     let fitness = self.evaluator.evaluate(problem, &positions);
         // todo!()
-    
-    problem.evaluate(genome)
-        
+        let x = self.config.c1 * self.config.c2;
+
+        let genome: Vec<f64> = vec![x; problem.dimension()];
+
+        problem.evaluate(&genome);
+
         let result = SingleResult {
             best_genome: vec![-1.0; 5],
             best_fitness: -5.0,
@@ -41,6 +44,8 @@ where
 }
 
 pub struct PsoConfig {
+    pub swarm_size: usize,
+    pub max_iterations: usize,
     pub c1: f64,
     pub c2: f64,
 }

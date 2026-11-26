@@ -2,9 +2,16 @@ use crate::core::problem::{Bounds, Problem, RealProblem};
 
 /// Sphere problem benchmark
 ///
+#[allow(dead_code)]
 #[derive(Clone)]
-struct Sphere {
-    dim: usize,
+pub struct Sphere {
+    pub dim: usize,
+}
+
+impl Sphere {
+    pub fn new(dim: usize) -> Self {
+        Self { dim }
+    }
 }
 
 impl Problem for Sphere {
