@@ -4,35 +4,29 @@ use crate::core::{
     result::SingleResult,
 };
 
+/// For disply optimization progression.
+pub type Callback = Box<dyn FnMut(usize, &[f64], f64, &mut bool)>;
+
 pub struct Pso<E> {
     pub config: PsoConfig,
     pub evaluator: E,
+    callback: Option<Callback>,
 }
 
 impl<E> Pso<E> {
     pub fn new(config: PsoConfig, evaluator: E) -> Self {
-        Self { config, evaluator }
+        Self {
+            config,
+            evaluator,
+            callback: None,
+        }
     }
-
-    fn validate_bounds(lower: &[f64], upper: &[f64]) -> Result<(), Error> {
-        if lower.is_empty() {
-            return Err(Error::InvalidProblem("dimension must be > 0".into()));
-        }
-        if lower.len() != upper.len() {
-            return Err(Error::InvalidProblem(
-                "lower and upper bounds differ in length".into(),
-            ));
-        }
-        if lower
-            .iter()
-            .zip(upper)
-            .any(|(l, u)| !l.is_finite() || !u.is_finite() || l > u)
-        {
-            return Err(Error::InvalidProblem(
-                "each bound must be finite with lower <= upper".into(),
-            ));
-        }
-        Ok(())
+    pub fn with_callback<F>(mut self, f: F) -> Self
+    where
+        F: FnMut(usize, &[f64], f64, &mut bool) + 'static,
+    {
+        self.callback = Some(Box::new(f));
+        self
     }
 }
 
@@ -46,14 +40,16 @@ where
     fn optimize(&mut self, problem: &mut P) -> Result<Self::Output, Error> {
         //--------------------------------------
         self.config.validate()?;
-        // Pso::validate_bounds(&problem.domain().lower, &problem.domain().upper)?;
         let dim = problem.domain().dimension();
         let ub = problem.domain().upper;
         let lb = problem.domain().lower;
 
         let max_iter = self.config.max_iterations;
         let nop = self.config.swarm_size;
-        let mut break_process: bool = false;
+        let mut gbest_fit: f64 = f64::NAN;
+        let mut gbest_x = vec![0.0; dim];
+        let mut iter: usize = 0;
+
         //--------------------------------------
         // Define the PSO's paramters
         let c1: f64 = self.config.c1;
@@ -61,6 +57,22 @@ where
 
         let w_max: f64 = 0.9;
         let w_min: f64 = 0.2;
+
+        // ------------------------------------
+        // Main PSO loop
+        for iter in 0..max_iter {
+
+
+            
+            //---------- Call the callback ----------------------
+            if let Some(cb) = self.callback.as_mut() {
+                let mut stop = false;
+                cb(iter + 1, &gbest_x, gbest_fit, &mut stop);
+                if stop {
+                    break;
+                }
+            }
+        }
         //--------------------------------------
         let result = SingleResult {
             best_genome: vec![-1.0; 5],
