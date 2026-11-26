@@ -1,3 +1,5 @@
+use super::problem::Problem;
+
 ///
 /// Define the Optimizer trait.
 ///

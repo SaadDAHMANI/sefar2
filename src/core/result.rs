@@ -1,3 +1,5 @@
+use super::problem::Objectives;
+
 ///
 /// Optimization result of single objective.
 ///

@@ -1,8 +1,24 @@
+use super::problem::Problem;
+
+
+///
 ///
 ///
 pub trait Evaluator {
     fn evaluate<P: Problem>(&self, problem: &P, pop: &[P::Genome]) -> Vec<P::Fitness>;
 }
+
+pub struct Sequential;
+
+impl Evaluator for Sequential{
+    fn evaluate<P: Problem>(&self, problem: &P, pop: &[P::Genome]) -> Vec<P::Fitness> {
+         pop.iter().map(|g| problem.evaluate(g)).collect()
+    }
+}
+
+// --------------------------------------
+ 
+pub struct Parallel;
 
 impl Evaluator for Parallel {
     fn evaluate<P: Problem>(&self, problem: &P, pop: &[P::Genome]) -> Vec<P::Fitness> {
