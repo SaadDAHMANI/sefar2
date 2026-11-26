@@ -2,9 +2,9 @@ use super::problem::Problem;
 
 ///
 ///
-///
-pub trait Evaluator {
-    fn evaluate<P: Problem>(&self, problem: &mut P, pop: &[P::Genome]) -> Vec<P::Fitness>;
+
+pub trait Evaluator<P: Problem> {
+    fn evaluate(&self, problem: &mut P, pop: &[P::Genome]) -> Vec<P::Fitness>;
 }
 
 ///
@@ -13,8 +13,9 @@ pub trait Evaluator {
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Sequential;
 
-impl Evaluator for Sequential {
-    fn evaluate<P: Problem>(&self, problem: &mut P, pop: &[P::Genome]) -> Vec<P::Fitness> {
+impl<P: Problem> Evaluator<P> for Sequential {
+    fn evaluate(&self, problem: &mut P, pop: &[P::Genome]) -> Vec<P::Fitness> {
+        // No clone: the problem is mutated in place.
         pop.iter().map(|g| problem.evaluate(g)).collect()
     }
 }
