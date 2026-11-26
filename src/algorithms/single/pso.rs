@@ -1,6 +1,7 @@
 // Real-coded PSO, single objective only
 use crate::core::{
-    evaluator::Evaluator, optimizer::Optimizer, problem::SingleObjectiveReal, result::SingleResult,
+    error::Error, evaluator::Evaluator, optimizer::Optimizer, problem::SingleObjectiveReal,
+    result::SingleResult,
 };
 
 pub struct Pso<E> {
@@ -21,7 +22,7 @@ where
 {
     type Output = SingleResult<Vec<f64>>;
 
-    fn optimize(&mut self, problem: &mut P) -> Self::Output {
+    fn optimize(&mut self, problem: &mut P) -> Result<Self::Output, Error> {
         // ... identical to before; these calls now go through &mut:
         //     let dim = problem.dimension();
         //     let fitness = self.evaluator.evaluate(problem, &positions);
@@ -39,7 +40,7 @@ where
             history: vec![-1.0; 5],
         };
 
-        result
+        Ok(result)
     }
 }
 
