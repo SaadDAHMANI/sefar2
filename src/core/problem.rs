@@ -6,20 +6,24 @@
 pub trait Problem {
     type Genome: Clone;
     type Fitness;
+    /// Description of the search space: `Bounds` for real problems,
+    /// a length for binary ones, and so on.
+    type Domain;
 
     fn evaluate(&mut self, genome: &Self::Genome) -> Self::Fitness;
+    fn domain(&self) -> Self::Domain;
 }
 
 ///
 /// Define the trait for Continuous Problems.
 ///
-pub trait RealProblem: Problem<Genome = Vec<f64>> {
-    fn dimension(&self) -> usize;
-    fn bounds(&self) -> Bounds;
-}
+pub trait SingleObjectiveReal: Problem<Genome = Vec<f64>, Fitness = f64, Domain = Bounds> {}
+
+impl<T> SingleObjectiveReal for T where T: Problem<Genome = Vec<f64>, Fitness = f64, Domain = Bounds>
+{}
 
 /// Define the trait for Binary Problems
-pub trait BinaryProblem: Problem<Genome = Vec<bool>> {
+pub trait BinaryProblem: Problem<Genome = Vec<bool>, Fitness = f64> {
     fn length(&self) -> usize;
 }
 
@@ -37,6 +41,9 @@ impl Bounds {
             lower: vec![lower; dim],
             upper: vec![upper; dim],
         }
+    }
+    pub fn dimension(&self) -> usize {
+        self.lower.len()
     }
 }
 

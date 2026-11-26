@@ -1,6 +1,6 @@
 // Real-coded PSO, single objective only
 use crate::core::{
-    evaluator::Evaluator, optimizer::Optimizer, problem::RealProblem, result::SingleResult,
+    evaluator::Evaluator, optimizer::Optimizer, problem::SingleObjectiveReal, result::SingleResult,
 };
 
 pub struct Pso<E> {
@@ -16,7 +16,7 @@ impl<E> Pso<E> {
 
 impl<P, E> Optimizer<P> for Pso<E>
 where
-    P: RealProblem<Fitness = f64>,
+    P: SingleObjectiveReal,
     E: Evaluator<P>,
 {
     type Output = SingleResult<Vec<f64>>;
@@ -28,7 +28,7 @@ where
         // todo!()
         let x = self.config.c1 * self.config.c2;
 
-        let genome: Vec<f64> = vec![x; problem.dimension()];
+        let genome: Vec<f64> = vec![x; problem.domain().dimension()];
 
         problem.evaluate(&genome);
 
