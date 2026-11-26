@@ -51,3 +51,25 @@ pub struct PsoConfig {
     pub c1: f64,
     pub c2: f64,
 }
+impl PsoConfig {
+    pub fn validate(&self) -> Result<(), Error> {
+        if self.c1 < 0.0 {
+            return Err(Error::InvalidConfig(
+                "C1 parameter (PSO) should be greater than 0!".to_string(),
+            ));
+        }
+
+        if self.c2 < 0.0 {
+            return Err(Error::InvalidConfig(
+                "C2 parameter (PSO) should be greater than 0!".to_string(),
+            ));
+        }
+
+        if self.max_iterations == 0 {
+            return Err(Error::InvalidConfig(
+                "max_iterations = 0! no iteration will be run!".to_string(),
+            ));
+        }
+        return Ok(());
+    }
+}
