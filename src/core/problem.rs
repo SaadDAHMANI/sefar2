@@ -23,6 +23,10 @@ impl<T> SingleObjectiveReal for T where T: Problem<Genome = Vec<f64>, Fitness = 
 {}
 
 /// Define the trait for Binary Problems
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` is not a single-objective binary problem",
+    note = "requires Genome = Vec<bool>, Fitness = f64, Domain = usize"
+)]
 pub trait SingleObjectiveBinary:
     Problem<Genome = Vec<bool>, Fitness = f64, Domain = usize>
 {
@@ -31,6 +35,7 @@ impl<T> SingleObjectiveBinary for T where
     T: Problem<Genome = Vec<bool>, Fitness = f64, Domain = usize>
 {
 }
+
 ///
 ///  Lower and Upper bound for real problems.
 ///
