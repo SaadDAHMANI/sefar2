@@ -1,4 +1,5 @@
 use sefar2::benchmarks::real::Sphere;
+use sefar2::prelude::Parallel;
 use sefar2::prelude::*;
 
 fn main() {
@@ -17,7 +18,7 @@ fn pso_test1() {
 
     let mut problem = Sphere::new(5);
 
-    let mut algo = Pso::new(config, Sequential);
+    let mut algo = Pso::new(config, Parallel::new(4));
 
     let output = algo.optimize(&mut problem);
 

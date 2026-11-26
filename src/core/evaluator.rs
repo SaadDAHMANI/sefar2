@@ -9,7 +9,7 @@ pub trait Evaluator<P: Problem> {
     fn evaluate(&self, problem: &mut P, pop: &[P::Genome]) -> Vec<P::Fitness>;
 }
 
-///
+/// 
 /// Sequential optimization.
 ///
 #[derive(Debug, Clone, Copy, Default)]
