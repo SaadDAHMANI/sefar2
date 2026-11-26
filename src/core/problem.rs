@@ -23,10 +23,14 @@ impl<T> SingleObjectiveReal for T where T: Problem<Genome = Vec<f64>, Fitness = 
 {}
 
 /// Define the trait for Binary Problems
-pub trait BinaryProblem: Problem<Genome = Vec<bool>, Fitness = f64> {
-    fn length(&self) -> usize;
+pub trait SingleObjectiveBinary:
+    Problem<Genome = Vec<bool>, Fitness = f64, Domain = usize>
+{
 }
-
+impl<T> SingleObjectiveBinary for T where
+    T: Problem<Genome = Vec<bool>, Fitness = f64, Domain = usize>
+{
+}
 ///
 ///  Lower and Upper bound for real problems.
 ///
