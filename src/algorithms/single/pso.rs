@@ -50,7 +50,7 @@ where
 
         let max_iter = self.config.max_iterations;
         let nop = self.config.swarm_size;
-        let mut gbest_fit: f64 = f64::NAN;
+        let mut gbest_fit: f64 = f64::MAX;
         let mut gbest_x = vec![0.0; dim];
         let mut iter: usize = 0;
 
@@ -59,8 +59,8 @@ where
         let _c1: f64 = self.config.c1;
         let _c2: f64 = self.config.c2;
 
-        let _w_max: f64 = 0.9;
-        let _w_min: f64 = 0.2;
+        let w_max: f64 = 0.9;
+        let w_min: f64 = 0.2;
 
         let mut v_max: Vec<f64> = Vec::with_capacity(dim);
         let mut v_min: Vec<f64> = Vec::with_capacity(dim);
@@ -84,14 +84,35 @@ where
         let mut rng = rand::rng();
         let mut particles = real_uniform(nop, &bounds, &mut rng);
         //initialize pbest_x population with (fitness = f64::MAX)
-        let mut _pbest_x = real_uniform(nop, &bounds, &mut rng);
+        let mut pbest_x = real_uniform(nop, &bounds, &mut rng);
+        let mut fitness_pbest_x = self.evaluator.evaluate(problem, &pbest_x);
+
         // ------------------------------------
         // Main PSO loop
 
         for iter in 0..max_iter {
-            let _fitness_particles = self.evaluator.evaluate(problem, &particles);
+            //Objective function computation
+            // Evaluate search agent using objective function
+            let fitness_particles = self.evaluator.evaluate(problem, &particles);
 
-            //---------- Call the callback ----------------------
+            //Update the pbest
+            for k in 0..nop {
+                if fitness_particles[k] < fitness_pbest_x[k] {
+                    pbest_x[k][..dim].clone_from_slice(&particles[k][..dim]);
+                }
+
+                //Update the gbest
+                if fitness_particles[k] < gbest_fit {
+                    gbest_fit = fitness_particles[k];
+                    gbest_x[..dim].clone_from_slice(&particles[k][..dim]);
+                }
+            }
+            //Update the x and v
+            let tf64 = iter as f64;
+            let max_iterf64 = max_iter as f64;
+            let w = w_max - ((tf64 * (w_max - w_min)) / max_iterf64);
+
+            //---------- Call the callback -----------------------------
             if let Some(cb) = self.callback.as_mut() {
                 let mut stop = false;
                 cb(iter + 1, &gbest_x, gbest_fit, &mut stop);
