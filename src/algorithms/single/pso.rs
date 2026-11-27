@@ -1,8 +1,11 @@
+// use std::ops::Bound;
+
 // Real-coded PSO, single objective only
 use crate::core::{
     error::Error, evaluator::Evaluator, optimizer::Optimizer, problem::SingleObjectiveReal,
     result::SingleResult,
 };
+use crate::operators::init::real_uniform;
 
 /// For disply optimization progression.
 pub type Callback = Box<dyn FnMut(usize, &[f64], f64, &mut bool)>;
@@ -40,9 +43,10 @@ where
     fn optimize(&mut self, problem: &mut P) -> Result<Self::Output, Error> {
         //--------------------------------------
         self.config.validate()?;
-        let dim = problem.domain().dimension();
-        let ub = problem.domain().upper;
-        let lb = problem.domain().lower;
+        let bounds = problem.domain();
+        let dim = bounds.dimension();
+        let ub = &bounds.upper;
+        let lb = &bounds.lower;
 
         let max_iter = self.config.max_iterations;
         let nop = self.config.swarm_size;
@@ -52,11 +56,11 @@ where
 
         //--------------------------------------
         // Define the PSO's paramters
-        let c1: f64 = self.config.c1;
-        let c2: f64 = self.config.c2;
+        let _c1: f64 = self.config.c1;
+        let _c2: f64 = self.config.c2;
 
-        let w_max: f64 = 0.9;
-        let w_min: f64 = 0.2;
+        let _w_max: f64 = 0.9;
+        let _w_min: f64 = 0.2;
 
         let mut v_max: Vec<f64> = Vec::with_capacity(dim);
         let mut v_min: Vec<f64> = Vec::with_capacity(dim);
@@ -66,21 +70,27 @@ where
             v_min.push(-1.0 * v_max[i]);
         }
 
-        let mut cgcurve = vec![0.0f64; max_iter];
+        let mut _cgcurve = vec![0.0f64; max_iter];
 
         // Velocities initialization
-        let mut v = vec![vec![0.0f64; dim]; nop];
-        let mut rand1 = vec![0.0f64; dim];
-        let mut rand2 = vec![0.0f64; dim];
+        let mut _v = vec![vec![0.0f64; dim]; nop];
+        let mut _rand1 = vec![0.0f64; dim];
+        let mut _rand2 = vec![0.0f64; dim];
 
         //------------------------------------
         // PSO algorithm
         // Particles initialization
-        // let mut particles = self.initialize(self.params, InitializationMode::RealUniform);
 
+        let mut rng = rand::rng();
+        let mut particles = real_uniform(nop, &bounds, &mut rng);
+        //initialize pbest_x population with (fitness = f64::MAX)
+        let mut _pbest_x = real_uniform(nop, &bounds, &mut rng);
         // ------------------------------------
         // Main PSO loop
+
         for iter in 0..max_iter {
+            let _fitness_particles = self.evaluator.evaluate(problem, &particles);
+
             //---------- Call the callback ----------------------
             if let Some(cb) = self.callback.as_mut() {
                 let mut stop = false;
@@ -90,6 +100,7 @@ where
                 }
             }
         }
+
         //--------------------------------------
         let result = SingleResult {
             best_genome: vec![-1.0; 5],

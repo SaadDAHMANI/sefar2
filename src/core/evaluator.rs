@@ -20,6 +20,11 @@ impl<P: Problem> Evaluator<P> for Sequential {
         // No clone: the problem is mutated in place.
         pop.iter().map(|g| problem.evaluate(g)).collect()
     }
+
+    /// Evaluate one genome.
+    fn evaluate_one(&self, problem: &mut P, genome: &P::Genome) -> P::Fitness {
+        problem.evaluate(genome)
+    }
 }
 
 // ------------------------------------------------------------------------------------------
