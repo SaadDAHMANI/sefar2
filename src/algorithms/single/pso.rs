@@ -5,7 +5,7 @@ use crate::core::{
     error::Error, evaluator::Evaluator, optimizer::Optimizer, problem::SingleObjectiveReal,
     result::SingleResult,
 };
-use crate::operators::init::real_uniform;
+use crate::operators::init::{fill_by_random_uniform, real_uniform};
 
 /// For disply optimization progression.
 pub type Callback = Box<dyn FnMut(usize, &[f64], f64, &mut bool)>;
@@ -50,14 +50,13 @@ where
 
         let max_iter = self.config.max_iterations;
         let nop = self.config.swarm_size;
-        let mut gbest_fit: f64 = f64::MAX;
+        let mut gbest_x_fit: f64 = f64::MAX;
         let mut gbest_x = vec![0.0; dim];
-        let mut iter: usize = 0;
 
         //--------------------------------------
         // Define the PSO's paramters
-        let _c1: f64 = self.config.c1;
-        let _c2: f64 = self.config.c2;
+        let c1: f64 = self.config.c1;
+        let c2: f64 = self.config.c2;
 
         let w_max: f64 = 0.9;
         let w_min: f64 = 0.2;
@@ -70,12 +69,12 @@ where
             v_min.push(-1.0 * v_max[i]);
         }
 
-        let mut _cgcurve = vec![0.0f64; max_iter];
+        let mut cgcurve = vec![0.0f64; max_iter];
 
         // Velocities initialization
-        let mut _v = vec![vec![0.0f64; dim]; nop];
-        let mut _rand1 = vec![0.0f64; dim];
-        let mut _rand2 = vec![0.0f64; dim];
+        let mut v = vec![vec![0.0f64; dim]; nop];
+        let mut rand1 = vec![0.0f64; dim];
+        let mut rand2 = vec![0.0f64; dim];
 
         //------------------------------------
         // PSO algorithm
@@ -85,11 +84,11 @@ where
         let mut particles = real_uniform(nop, &bounds, &mut rng);
         //initialize pbest_x population with (fitness = f64::MAX)
         let mut pbest_x = real_uniform(nop, &bounds, &mut rng);
-        let mut fitness_pbest_x = self.evaluator.evaluate(problem, &pbest_x);
+        let fitness_pbest_x = self.evaluator.evaluate(problem, &pbest_x);
 
         // ------------------------------------
         // Main PSO loop
-
+        let mut iter_counter: usize = 0;
         for iter in 0..max_iter {
             //Objective function computation
             // Evaluate search agent using objective function
@@ -102,8 +101,8 @@ where
                 }
 
                 //Update the gbest
-                if fitness_particles[k] < gbest_fit {
-                    gbest_fit = fitness_particles[k];
+                if fitness_particles[k] < gbest_x_fit {
+                    gbest_x_fit = fitness_particles[k];
                     gbest_x[..dim].clone_from_slice(&particles[k][..dim]);
                 }
             }
@@ -112,11 +111,50 @@ where
             let max_iterf64 = max_iter as f64;
             let w = w_max - ((tf64 * (w_max - w_min)) / max_iterf64);
 
+            for k in 0..nop {
+                fill_by_random_uniform(&mut rand1, &mut rng, 0.0, 1.0);
+                fill_by_random_uniform(&mut rand2, &mut rng, 0.0, 1.0);
+
+                for j in 0..dim {
+                    v[k][j] = (w * v[k][j])
+                        + (c1 * rand1[j] * (pbest_x[k][j] - particles[k][j]))
+                        + (c2 * rand2[j] * (gbest_x[j] - particles[k][j]));
+                }
+                // -----------------------------------
+                for j in 0..dim {
+                    if v[k][j] > v_max[j] {
+                        //index1.push(j);
+                        v[k][j] = v_max[j];
+                    }
+
+                    if v[k][j] < v_min[j] {
+                        //index2.push(j);
+                        v[k][j] = v_min[j];
+                    }
+                }
+                //------------------------------------
+                // Update particles positions
+                for j in 0..dim {
+                    particles[k][j] = particles[k][j] + v[k][j];
+                }
+                //------------------------------------
+                for j in 0..dim {
+                    if particles[k][j] > ub[j] {
+                        particles[k][j] = ub[j];
+                    }
+
+                    if particles[k][j] < lb[j] {
+                        particles[k][j] = lb[j];
+                    }
+                }
+            }
+            cgcurve[iter] = gbest_x_fit;
+            iter_counter = iter + 1;
             //---------- Call the callback -----------------------------
             if let Some(cb) = self.callback.as_mut() {
-                let mut stop = false;
-                cb(iter + 1, &gbest_x, gbest_fit, &mut stop);
-                if stop {
+                let mut stop_process = false;
+                cb(iter + 1, &gbest_x, gbest_x_fit, &mut stop_process);
+                if stop_process {
                     break;
                 }
             }
@@ -124,10 +162,10 @@ where
 
         //--------------------------------------
         let result = SingleResult {
-            best_genome: vec![-1.0; 5],
-            best_fitness: -5.0,
-            evaluations: 10,
-            history: vec![-1.0; 5],
+            best_genome: gbest_x,
+            best_fitness: gbest_x_fit,
+            evaluations: iter_counter,
+            history: cgcurve,
         };
 
         Ok(result)
