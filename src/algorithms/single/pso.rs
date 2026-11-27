@@ -2,21 +2,25 @@
 
 // Real-coded PSO, single objective only
 use crate::core::{
-    error::Error, evaluator::Evaluator, optimizer::Optimizer, problem::SingleObjectiveReal,
+    callback::{Callback, Progress},
+    error::Error,
+    evaluator::Evaluator,
+    optimizer::Optimizer,
+    problem::SingleObjectiveReal,
     result::SingleResult,
 };
+
+use std::ops::ControlFlow;
+
 use crate::operators::init::{fill_by_random_uniform, real_uniform};
 
-/// For disply optimization progression.
-pub type Callback = Box<dyn FnMut(usize, &[f64], f64, &mut bool)>;
-
-pub struct Pso<E> {
+pub struct Pso<'a, E> {
     pub config: PsoConfig,
     pub evaluator: E,
-    callback: Option<Callback>,
+    callback: Option<Callback<'a>>,
 }
 
-impl<E> Pso<E> {
+impl<'a, E> Pso<'a, E> {
     pub fn new(config: PsoConfig, evaluator: E) -> Self {
         Self {
             config,
@@ -24,16 +28,17 @@ impl<E> Pso<E> {
             callback: None,
         }
     }
+
     pub fn with_callback<F>(mut self, f: F) -> Self
     where
-        F: FnMut(usize, &[f64], f64, &mut bool) + 'static,
+        F: FnMut(&Progress<'_, [f64]>) -> ControlFlow<()> + 'a,
     {
         self.callback = Some(Box::new(f));
         self
     }
 }
 
-impl<P, E> Optimizer<P> for Pso<E>
+impl<'a, P, E> Optimizer<P> for Pso<'a, E>
 where
     P: SingleObjectiveReal,
     E: Evaluator<P>,
@@ -152,9 +157,13 @@ where
             iter_counter = iter + 1;
             //---------- Call the callback -----------------------------
             if let Some(cb) = self.callback.as_mut() {
-                let mut stop_process = false;
-                cb(iter + 1, &gbest_x, gbest_x_fit, &mut stop_process);
-                if stop_process {
+                let info = Progress {
+                    iteration: iter + 1,
+                    evaluations: iter_counter * nop,
+                    best_genome: gbest_x.as_slice(),
+                    best_fitness: gbest_x_fit,
+                };
+                if cb(&info).is_break() {
                     break;
                 }
             }

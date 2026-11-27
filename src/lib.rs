@@ -5,6 +5,7 @@ pub mod operators;
 
 pub mod prelude {
     pub use crate::algorithms::pso::{Pso, PsoConfig};
+    pub use crate::core::callback::{Callback, Progress};
     pub use crate::core::error::Error;
     pub use crate::core::evaluator::{Evaluator, Parallel, Sequential};
     pub use crate::core::optimizer::Optimizer;
