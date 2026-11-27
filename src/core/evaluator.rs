@@ -40,7 +40,13 @@ pub struct Parallel<P> {
 impl<P> Parallel<P> {
     pub fn new(threads: usize) -> Self {
         let pool = ThreadPoolBuilder::new()
-            .num_threads(threads.max(1))
+            .num_threads(
+                threads.max(1).min(
+                    std::thread::available_parallelism()
+                        .map(|n| n.get())
+                        .unwrap_or(1),
+                ),
+            )
             .build()
             .expect("failed to build rayon thread pool");
         Self {
