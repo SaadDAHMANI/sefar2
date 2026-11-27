@@ -7,6 +7,11 @@ use std::sync::{Mutex, OnceLock};
 ///
 pub trait Evaluator<P: Problem> {
     fn evaluate(&self, problem: &mut P, pop: &[P::Genome]) -> Vec<P::Fitness>;
+
+    /// Evaluate one genome.
+    fn evaluate_one(&self, problem: &mut P, genome: &P::Genome) -> P::Fitness {
+        problem.evaluate(genome)
+    }
 }
 
 ///
@@ -19,11 +24,6 @@ impl<P: Problem> Evaluator<P> for Sequential {
     fn evaluate(&self, problem: &mut P, pop: &[P::Genome]) -> Vec<P::Fitness> {
         // No clone: the problem is mutated in place.
         pop.iter().map(|g| problem.evaluate(g)).collect()
-    }
-
-    /// Evaluate one genome.
-    fn evaluate_one(&self, problem: &mut P, genome: &P::Genome) -> P::Fitness {
-        problem.evaluate(genome)
     }
 }
 
